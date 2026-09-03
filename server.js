@@ -12,6 +12,7 @@ const userRoutes = require("./router/userRouter");
 const adminRoutes = require("./router/adminRouter");
 
 const app = express();
+app.set("trust proxy", 1);
 
 //DATABASE 
 connectDB();
@@ -42,7 +43,7 @@ app.use(
     cookie :{
       maxAge:24*60*60*1000,
       httpOnly:true,
-        secure: false,  
+        secure: process.env.NODE_ENV === "production", 
         sameSite: "lax"
     }
   })
