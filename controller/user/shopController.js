@@ -63,7 +63,7 @@ const getShopController = async (req, res) => {
     .populate({
       path: "category",
       select: "name offer",
-      match: { isDeleted: false, isActive: true } // ← ADD THIS
+      match: { isDeleted: { $ne: true }, isActive: true } // ← ADD THIS
     })
     .sort(sortQuery)
     .skip(skip)
@@ -130,7 +130,7 @@ const getProductDetailsController = async (req, res) => {
   isDeleted: false,
 }).populate({
   path: "category",
-  match: { isDeleted: false, isActive: true } // ← ADD THIS
+  match: { isDeleted: { $ne: true }, isActive: true } // ← ADD THIS
 }).lean();
 
 // ← ADD THIS CHECK
