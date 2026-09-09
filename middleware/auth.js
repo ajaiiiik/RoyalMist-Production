@@ -3,6 +3,9 @@ const Cart = require("../model/cartSchema"); // ← NEW
 
 const isAuthenticated = async (req, res, next) => {
   if (!req.isAuthenticated() && !req.session.user) {
+    if (req.headers.accept && req.headers.accept.includes("application/json") || req.headers["content-type"] === "application/json") {
+      return res.status(401).json({ success: false, message: "Please sign in to continue", redirectTo: "/signin" });
+    }
     return res.redirect("/signin");
   }
 

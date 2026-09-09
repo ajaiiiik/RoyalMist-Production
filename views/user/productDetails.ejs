@@ -1004,6 +1004,11 @@
           price: selectedPrice
         })
       });
+      if (res.status === 401) {
+        showToast("Please sign in to add items to cart", true);
+        setTimeout(() => { window.location.href = "/signin"; }, 1200);
+        return;
+      }
       const data = await res.json();
       if (data.success) {
         btn.innerHTML = '<i class="fas fa-check me-2"></i>ADDED TO CART!';
