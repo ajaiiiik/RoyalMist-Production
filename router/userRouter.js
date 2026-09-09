@@ -113,7 +113,7 @@ router.get("/auth/google/callback",
   })
 }
 );
-router.get("/home", isAuthenticated, async (req, res) => {
+router.get("/home", async (req, res) => {
   try {
     const user = req.session.user || req.user || null;
 
