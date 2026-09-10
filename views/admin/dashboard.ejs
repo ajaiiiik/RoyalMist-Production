@@ -897,20 +897,7 @@ document.querySelectorAll('.nav-item').forEach(item => {
 });
 
 /* ─── CHART DATA ─── */
-const chartData = {
-    week: {
-        labels: ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'],
-        data: [3200, 4800, 3700, 5900, 7200, 5400, 4100]
-    },
-    month: {
-        labels: ['Week 1','Week 2','Week 3','Week 4'],
-        data: [18000, 24000, 21000, 29000]
-    },
-    year: {
-        labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-        data: [42000,38000,51000,46000,60000,55000,70000,65000,72000,80000,75000,90000]
-    }
-};
+const chartData = <%- chartDataJson %>;
 
 
 const chartDocument = {

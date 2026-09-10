@@ -117,6 +117,39 @@ const getDashboardController = async (req, res) => {
       Order.countDocuments({ orderStatus: "Cancelled" }),
     ]);
 
+    const weekLabels = [];
+    const weekData = [];
+    for (let i = 6; i >= 0; i--) {
+      const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+      const dayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i + 1);
+      const dayOrders = await Order.find({ createdAt: { $gte: dayStart, $lt: dayEnd }, orderStatus: { $nin: ["Cancelled"] } }).lean();
+      const dayRevenue = dayOrders.reduce((s, o) => s + o.grandTotal, 0);
+      weekLabels.push(dayStart.toLocaleDateString("en-US", { weekday: "short" }));
+      weekData.push(dayRevenue);
+    }
+
+    const monthLabels = [];
+    const monthData = [];
+    for (let i = 3; i >= 0; i--) {
+      const weekStart = new Date(now.getTime() - (i + 1) * 7 * 24 * 60 * 60 * 1000);
+      const weekEnd = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
+      const weekOrders = await Order.find({ createdAt: { $gte: weekStart, $lt: weekEnd }, orderStatus: { $nin: ["Cancelled"] } }).lean();
+      const weekRevenue = weekOrders.reduce((s, o) => s + o.grandTotal, 0);
+      monthLabels.push("Week " + (4 - i));
+      monthData.push(weekRevenue);
+    }
+
+    const yearLabels = [];
+    const yearData = [];
+    for (let i = 11; i >= 0; i--) {
+      const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+      const monthOrders = await Order.find({ createdAt: { $gte: monthStart, $lt: monthEnd }, orderStatus: { $nin: ["Cancelled"] } }).lean();
+      const monthRevenue = monthOrders.reduce((s, o) => s + o.grandTotal, 0);
+      yearLabels.push(monthStart.toLocaleDateString("en-US", { month: "short" }));
+      yearData.push(monthRevenue);
+    }
+
     res.render("admin/dashboard", {
       totalCustomers,
       totalOrders,
@@ -126,6 +159,11 @@ const getDashboardController = async (req, res) => {
       pending,
       shipped,
       cancelled,
+      chartDataJson: JSON.stringify({
+        week: { labels: weekLabels, data: weekData },
+        month: { labels: monthLabels, data: monthData },
+        year: { labels: yearLabels, data: yearData },
+      }),
     });
   } catch (err) {
     console.error("getDashboardController error:", err);
