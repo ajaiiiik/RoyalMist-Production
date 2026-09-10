@@ -47,6 +47,10 @@ const { getSalesReportController, downloadSalesReportController } = require("../
 
 const adminAuth = (req, res, next) => {
   if (req.session.admin) return next();
+  const wantsJson = (req.headers.accept && req.headers.accept.includes("application/json")) || req.headers["content-type"] === "application/json";
+  if (wantsJson) {
+    return res.status(401).json({ success: false, message: "Admin session expired. Please sign in again." });
+  }
   return res.redirect("/admin/signin");
 };
 
