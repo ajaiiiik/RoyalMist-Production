@@ -110,6 +110,32 @@ const updateOrderStatusController = async (req, res) => {
     if (status === "Delivered") {
       order.deliveredAt = new Date();
       if (order.paymentMethod === "COD") order.paymentStatus = "Paid";
+
+      const User = require("../../model/userSchema");
+      const orderUser = await User.findById(order.user);
+
+      const needsReward = orderUser && orderUser.referredBy && orderUser.referralRewardGiven !== true;
+
+      if (needsReward) {
+        const deliveredCount = await Order.countDocuments({ user: order.user, orderStatus: "Delivered" });
+
+        if (deliveredCount === 1) {
+          let userWallet = await Wallet.findOne({ user: orderUser._id });
+          if (userWallet === null) userWallet = await Wallet.create({ user: orderUser._id, balance: 0, transactions: [] });
+          userWallet.balance += 100;
+          userWallet.transactions.push({ type: "credit", amount: 100, description: "Referral signup bonus", orderId: order._id });
+          await userWallet.save();
+
+          let referrerWallet = await Wallet.findOne({ user: orderUser.referredBy });
+          if (referrerWallet === null) referrerWallet = await Wallet.create({ user: orderUser.referredBy, balance: 0, transactions: [] });
+          referrerWallet.balance += 500;
+          referrerWallet.transactions.push({ type: "credit", amount: 500, description: "Referral reward", orderId: order._id });
+          await referrerWallet.save();
+
+          orderUser.referralRewardGiven = true;
+          await orderUser.save();
+        }
+      }
     }
 
     // Cancelled → restore stock + refund

@@ -240,6 +240,15 @@ const verifyOtpService = async (data, req) => {
   await Otp.deleteMany({ email: userData.email });
   let newUser;
   try {
+    userData.myReferralCode = "RM" + Math.random().toString(36).substring(2, 8).toUpperCase();
+
+    if (userData.referralCode) {
+      const referrer = await User.findOne({ myReferralCode: userData.referralCode.trim().toUpperCase() });
+      if (referrer) {
+        userData.referredBy = referrer._id;
+      }
+    }
+
     newUser = await User.create(userData);
   } catch (err) {
     if (err.code === 11000) {
