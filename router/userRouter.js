@@ -74,7 +74,7 @@ const { getWalletController, createWalletOrderController, verifyWalletPaymentCon
 
 
 router.get("/", (req, res) => {
-  res.redirect("/signup");
+  res.redirect("/home");
 });
 
 
@@ -108,7 +108,7 @@ router.get("/auth/google/callback",
       referralCode: req.user.referralCode || null
     };
     req.session.save((err) => {
-  if (err) return res.redirect("/signup");
+  if (err) return res.redirect("/home");
     res.redirect("/home"); 
   })
 }
