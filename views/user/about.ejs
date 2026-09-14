@@ -46,6 +46,9 @@
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
     .dropdown-menu-custom.show { display: block; }
+    @media (max-width: 768px) {
+      .dropdown-menu-custom { position: fixed; top: auto; right: 10px; left: auto; max-width: calc(100vw - 20px); }
+    }
     .dropdown-item-custom {
       color: #fff; background: none; border: none;
       text-decoration: none; display: block;

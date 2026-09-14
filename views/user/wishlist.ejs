@@ -16,7 +16,7 @@
     .navbar-brand { color: var(--gold) !important; letter-spacing: 4px; font-weight: 700; }
     .nav-link { color: #fff !important; font-size: 12px; letter-spacing: 2px; }
     .user-dropdown { position: relative; z-index: 2000; }
-    .dropdown-menu-custom { position: absolute; top: 100%; right: 0; background: #0a0a0a; border: 1px solid #222; min-width: 160px; z-index: 3000; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    .dropdown-menu-custom { position: absolute; top: 100%; right: 0; background: #0a0a0a; border: 1px solid #222; min-width: 160px; z-index: 3000; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.5); } @media (max-width: 768px) { .dropdown-menu-custom { position: fixed; top: auto; right: 10px; left: auto; max-width: calc(100vw - 20px); } }
     .dropdown-menu-custom.show { display: block; }
     .dropdown-item-custom { color: #fff; background: none; border: none; text-decoration: none; display: block; padding: 10px 15px; width: 100%; text-align: left; font-family: var(--font-main); font-size: 13px; cursor: pointer; }
     .dropdown-item-custom:hover { color: var(--gold); background: #111; }
