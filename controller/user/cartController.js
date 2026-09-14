@@ -13,8 +13,15 @@ const MAX_QUANTITY = 5;
 // ── GET /cart ────────────────────────────────────────────────────
 const getCartController = async (req, res) => {
   try {
-    const userId = req.session.user.id;
-    const user   = req.session.user;
+    const user = req.session.user || null;
+
+    if (!user) {
+      return res.render("user/cart", {
+        user: null, cartItems: [], totalAmount: 0, totalItems: 0,
+      });
+    }
+
+    const userId = user.id;
 
     const cart = await Cart.findOne({ user: userId })
       .populate({
