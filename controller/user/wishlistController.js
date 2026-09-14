@@ -71,10 +71,38 @@ const removeFromWishlistController = async (req, res) => {
 
 const moveToCartController = async (req, res) => {
   try {
-    const userId = req.session.user.id;
+    const user = req.session.user || null;
     const { productId } = req.body;
     if (!productId)
       return res.json({ success: false, message: "Product ID required" });
+
+    if (!user) {
+      const Product = require("../../model/productSchema");
+      const product = await Product.findOne({ _id: productId, isActive: true, isDeleted: false });
+      if (!product) return res.json({ success: false, message: "Product not available" });
+
+      const size  = product.volumes[0].size;
+      const price = product.volumes[0].price;
+      const stock = product.volumes[0].stock;
+      if (stock === 0) return res.json({ success: false, message: "This variant is out of stock" });
+
+      if (!req.session.guestCart) req.session.guestCart = [];
+      const existingIndex = req.session.guestCart.findIndex(
+        item => item.productId === productId && item.size === size
+      );
+      if (existingIndex > -1) {
+        return res.json({ success: true, alreadyInCart: true });
+      }
+      req.session.guestCart.push({ productId, size, quantity: 1, price });
+
+      req.session.guestWishlist = (req.session.guestWishlist || []).filter(id => id !== productId);
+
+      return req.session.save(() => {
+        res.json({ success: true, alreadyInCart: false, totalItems: req.session.guestCart.length });
+      });
+    }
+
+    const userId = user.id;
     const result = await moveToCartService(userId, productId);
     return res.json({
       success: true,

@@ -244,7 +244,7 @@ router.post("/cart/remove", isAuthenticated, removeFromCartController);
 router.get ("/wishlist",        getWishlistController);
 router.post("/wishlist/add",    addToWishlistController);
 router.post("/wishlist/remove", isAuthenticated, removeFromWishlistController);
-router.post("/wishlist/move-to-cart", isAuthenticated, moveToCartController);
+router.post("/wishlist/move-to-cart", moveToCartController);
 
 
 
