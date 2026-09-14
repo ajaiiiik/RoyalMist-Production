@@ -16,9 +16,36 @@ const getCartController = async (req, res) => {
     const user = req.session.user || null;
 
     if (!user) {
-      return res.render("user/cart", {
-        user: null, cartItems: [], totalAmount: 0, totalItems: 0,
-      });
+      const guestCart = req.session.guestCart || [];
+      if (guestCart.length === 0) {
+        return res.render("user/cart", {
+          user: null, cartItems: [], totalAmount: 0, totalItems: 0,
+        });
+      }
+
+      const productIds = guestCart.map(i => i.productId);
+      const products = await Product.find({ _id: { $in: productIds }, isActive: true, isDeleted: false })
+        .select("name images volumes isActive isDeleted fragranceType category")
+        .populate({ path: "category", select: "name" })
+        .lean();
+
+      const cartItems = guestCart
+        .map(gi => {
+          const product = products.find(p => p._id.toString() === gi.productId);
+          if (!product) return null;
+          return {
+            product,
+            size: gi.size,
+            quantity: gi.quantity,
+            price: gi.price,
+          };
+        })
+        .filter(Boolean);
+
+      const totalAmount = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      const totalItems  = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+      return res.render("user/cart", { user: null, cartItems, totalAmount, totalItems });
     }
 
     const userId = user.id;
@@ -59,7 +86,7 @@ const getCartController = async (req, res) => {
 // ── POST /cart/add ───────────────────────────────────────────────
 const addToCartController = async (req, res) => {
   try {
-    const userId = req.session.user.id;
+    const user = req.session.user || null;
     const { productId, size, quantity = 1 } = req.body; // ← price removed from destructure
 
     // 1. Validate product — populate category to check category-level offer too
@@ -79,6 +106,28 @@ const addToCartController = async (req, res) => {
     const finalPrice = offerInfo.hasOffer
       ? Math.max(0, selectedVolume.price - offerInfo.discount)
       : selectedVolume.price;
+
+    if (!user) {
+      if (!req.session.guestCart) req.session.guestCart = [];
+      const existingGuestIndex = req.session.guestCart.findIndex(
+        item => item.productId === productId && item.size === size
+      );
+      if (existingGuestIndex > -1) {
+        return res.json({ success: false, message: "This item is already in your cart" });
+      }
+      if (Number(quantity) > MAX_QUANTITY) {
+        return res.json({ success: false, message: `Maximum ${MAX_QUANTITY} items allowed per product` });
+      }
+      if (Number(quantity) > selectedVolume.stock) {
+        return res.json({ success: false, message: `Only ${selectedVolume.stock} units available` });
+      }
+      req.session.guestCart.push({ productId, size, quantity: Number(quantity), price: finalPrice });
+      return req.session.save(() => {
+        res.json({ success: true, message: "Added to cart" });
+      });
+    }
+
+    const userId = user.id;
 
     // 3. Find or create cart
     let cart = await Cart.findOne({ user: userId });

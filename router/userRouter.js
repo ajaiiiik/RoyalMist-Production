@@ -236,7 +236,7 @@ router.delete("/shop/:id/review", isAuthenticated, deleteReviewController);
 
 //CART
 router.get ("/cart",        getCartController);
-router.post("/cart/add",    isAuthenticated, addToCartController);
+router.post("/cart/add",    addToCartController);
 router.post("/cart/update", isAuthenticated, updateCartController);
 router.post("/cart/remove", isAuthenticated, removeFromCartController);
 
