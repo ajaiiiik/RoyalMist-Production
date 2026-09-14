@@ -373,9 +373,15 @@
           </div>
           <button class="btn-checkout disabled" disabled>PROCEED TO CHECKOUT</button>
         <% } else { %>
+          <% if (user) { %>
           <a href="/checkout" class="btn-checkout" id="checkoutBtn">
             <i class="fas fa-lock me-2"></i>PROCEED TO CHECKOUT
           </a>
+          <% } else { %>
+          <a href="#" class="btn-checkout" id="checkoutBtn" onclick="showToast('Please sign in to continue', true); setTimeout(() => { window.location.href = '/signin'; }, 1200); return false;">
+            <i class="fas fa-lock me-2"></i>PROCEED TO CHECKOUT
+          </a>
+          <% } %>
         <% } %>
 
         <a href="/shop" class="btn-continue"><i class="fas fa-arrow-left me-2"></i>CONTINUE SHOPPING</a>
